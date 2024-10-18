@@ -20,12 +20,10 @@ async def measure_runtime() -> float:
     start_time = time.time()  # Record the start time
 
     # Execute async_comprehension four times in parallel
-    await asyncio.gather(
-        async_comprehension(),
-        async_comprehension(),
-        async_comprehension(),
-        async_comprehension(),
-    )
+    await asyncio.gather(async_comprehension(),
+                         async_comprehension(),
+                         async_comprehension(),
+                         async_comprehension())
 
     total_time = time.time() - start_time  # Calculate elapsed time
     return total_time
