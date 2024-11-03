@@ -3,12 +3,18 @@
 
 This module contains tests to verify that the GithubOrgClient class
 correctly retrieves organization data without making external HTTP requests.
+
+Integration tests for the GithubOrgClient class in the client module.
+
+This module tests the public_repos method by mocking only external requests
+made by the requests module while using real data structures from fixtures.
 """
 
 import unittest
 from unittest.mock import patch
 from parameterized import parameterized
 from client import GithubOrgClient
+from fixtures import org_payload, repos_payload, expected_repos, apache2_repos
 
 
 class TestGithubOrgClient(unittest.TestCase):
@@ -114,6 +120,42 @@ class TestGithubOrgClient(unittest.TestCase):
         """
         result = GithubOrgClient.has_license(repo, license_key)
         self.assertEqual(result, expected)
+
+
+@parameterized_class(
+    ('org_payload', 'repos_payload', 'expected_repos', 'apache2_repos'),
+    [(org_payload, repos_payload, expected_repos, apache2_repos)]
+)
+class TestIntegrationGithubOrgClient(unittest.TestCase):
+    """Integration test case for the GithubOrgClient class."""
+
+    @classmethod
+    def setUpClass(cls):
+        """Set up the test case by patching requests.get."""
+        cls.get_patcher = patch('client.requests.get')
+        cls.mock_get = cls.get_patcher.start()
+
+        # Mock the return values for the various URLs
+        cls.mock_get.side_effect = lambda url: (
+            cls.org_payload if 'orgs' in url else
+            cls.repos_payload if 'repos' in url else
+            {}
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        """Tear down the test case by stopping the patcher."""
+        cls.get_patcher.stop()
+
+    def test_public_repos(self):
+        """Test the public_repos method for the expected outputs."""
+        client = GithubOrgClient('google')
+
+        # Call the public_repos method and check the results
+        repos = client.public_repos()
+
+        # Assert that the results match what we expect
+        self.assertEqual(repos, self.expected_repos)
 
 
 if __name__ == "__main__":
