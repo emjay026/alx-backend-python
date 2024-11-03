@@ -135,7 +135,7 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         cls.get_patcher = patch('client.requests.get')
         cls.mock_get = cls.get_patcher.start()
 
-        # Mock the return values for the various URLs
+        # Mock the return values for various URLs
         cls.mock_get.side_effect = lambda url: (
             cls.org_payload if 'orgs' in url else
             cls.repos_payload if 'repos' in url else
@@ -156,6 +156,16 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
 
         # Assert that the results match what we expect
         self.assertEqual(repos, self.expected_repos)
+
+    def test_public_repos_with_license(self):
+        """Test the public_repos method with a specific license argument."""
+        client = GithubOrgClient('google')
+
+        # Call the public_repos method with license argument
+        repos_with_license = client.public_repos(license="apache-2.0")
+
+        # Assert that the result matches the expected value from the fixture
+        self.assertEqual(repos_with_license, self.apache2_repos)
 
 
 if __name__ == "__main__":
