@@ -3,6 +3,12 @@
 
 This module contains tests to verify that the access_nested_map function
 correctly returns values from nested dictionaries based on provided paths.
+
+Unit tests for the get_json function in the utils module.
+
+This module contains tests to verify that the get_json function
+correctly retrieves JSON data from a specified URL without making
+actual HTTP requests.
 """
 
 import unittest
@@ -51,6 +57,39 @@ class TestAccessNestedMap(unittest.TestCase):
 
         # Check the exception message matches the expected key
         self.assertEqual(str(context.exception), repr(path[-1]))
+
+
+class TestGetJson(unittest.TestCase):
+    """Test case for the get_json function."""
+
+    @parameterized.expand([
+        ("http://example.com", {"payload": True}),
+        ("http://holberton.io", {"payload": False}),
+    ])
+    @patch('utils.requests.get')  # Patch requests.get
+    def test_get_json(self, test_url, test_payload, mock_get):
+        """Test get_json returns expected JSON payload.
+
+        Parameters
+        ----------
+        test_url: str
+            The URL to test with.
+        test_payload: dict
+            The expected JSON payload to return.
+        """
+        # Create a mock response object with a json method
+        mock_response = Mock()
+        mock_response.json.return_value = test_payload
+        mock_get.return_value = mock_response  # Mock the return value
+
+        # Call the get_json function
+        result = get_json(test_url)
+
+        # Verify the mocked requests.get was called with test_url
+        mock_get.assert_called_once_with(test_url)
+
+        # Test that the output of get_json is equal to test_payload
+        self.assertEqual(result, test_payload)
 
 
 if __name__ == "__main__":
