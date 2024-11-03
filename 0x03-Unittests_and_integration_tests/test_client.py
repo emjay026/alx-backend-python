@@ -80,20 +80,19 @@ class TestGithubOrgClient(unittest.TestCase):
         # Create an instance of GithubOrgClient
         client = GithubOrgClient("google")
 
-        # Patch the _public_repos_url property
+        # Patch the _public_repos_url property with a specific URL
         with patch.object(
             client,
             '_public_repos_url',
             return_value="https://api.github.com/orgs/google/repos"
         ):
-
             # Call the public_repos method with no license filter
             repos = client.public_repos()
 
             # Assert that the returned list matches expected repository names
             self.assertEqual(repos, ["repo1", "repo2", "repo3"])
 
-            # Assert that the mocked get_json was called once
+            # Assert that the mocked get_json was called once with correct URL
             mock_get_json.assert_called_once_with(
                 "https://api.github.com/orgs/google/repos")
 
